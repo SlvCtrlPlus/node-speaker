@@ -1,8 +1,13 @@
 # node-speaker
 
+> ℹ️ **Info:** This is an a fork of the original node-speaker package. It includes the fixes for Linux ARM64 support and
+> the muting of the coreaudio buffer underflow warning. 
+> CI has been extended to all major OS/Arch/Node combinations and dependencies haven been updated. 
+> Node >=18 is required now.
+
 ## Output [PCM audio][pcm] data to the speakers
 
-[![Build Status](https://github.com/TooTallNate/node-speaker/workflows/Node%20CI/badge.svg)](https://github.com/TooTallNate/node-speaker/actions?workflow=Node+CI)
+[![Build Status](https://github.com/SlvCtrlPlus/node-speaker/workflows/Node%20CI/badge.svg)](https://github.com/SlvCtrlPlus/node-speaker/actions?workflow=Node+CI)
 
 A Writable stream instance that accepts [PCM audio][pcm] data and outputs it
 to the speakers. The output is backed by `mpg123`'s audio output modules, which
