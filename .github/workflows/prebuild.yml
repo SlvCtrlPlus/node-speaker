@@ -50,12 +50,8 @@ jobs:
       - name: Install dependencies
         run: npm install --ignore-scripts
 
-      - name: Install prebuildify
-        run: npm install -g prebuildify
-
       - name: Prebuild
-        run: prebuildify --napi --strip
-
+        run: npm run prebuild
 
       - name: Upload prebuilds
         uses: actions/upload-artifact@v4
