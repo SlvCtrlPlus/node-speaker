@@ -4,25 +4,43 @@ on: [push]
 
 jobs:
   build:
-    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.combo.os }}-${{ matrix.combo.arch }}
 
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [8.x, 10.x, 12.x]
+        node-version: [8.x, 18.x, 20.x, 22.x]
+        combo:
+          - runs-on: ubuntu-latest
+            os: ubuntu
+            arch: x64
+          - runs-on: ubuntu-latest
+            os: ubuntu
+            arch: arm64
+          - runs-on: macos-latest
+            os: macos
+            arch: x64
+          - runs-on: macos-latest
+            os: macos
+            arch: arm64
+          - runs-on: windows-latest
+            os: windows
+            arch: x64
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.combo.runs-on }}
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Install libasound2-dev
-      run: sudo apt-get install -y libasound2-dev
-      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev
+      if: matrix.combo.os == 'ubuntu'
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1
-      if: matrix.os == 'windows-latest'
+      if: matrix.combo.os == 'windows'
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v2
