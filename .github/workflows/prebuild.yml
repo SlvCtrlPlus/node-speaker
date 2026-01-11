@@ -14,26 +14,32 @@ jobs:
           # Linux x64
           - os: ubuntu-latest
             arch: x64
+            node: '20.x'
 
           # Linux ARM64
           - os: ubuntu-latest
             arch: arm64
+            node: '20.x'
 
           # macOS x64
           - os: macos-latest
             arch: x64
+            node: '20.x'
 
           # macOS ARM64
           - os: macos-latest
             arch: arm64
+            node: '20.x'
 
           # Windows x64
           - os: windows-latest
             arch: x64
+            node: '20.x'
 
-          # Windows x86
+          # Windows x86 (32-bit) - uses Node 18 for ia32 support
           - os: windows-latest
             arch: ia32
+            node: '18.x'
 
     runs-on: ${{ matrix.os }}
 
@@ -45,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
           architecture: ${{ matrix.arch }}
 
       - name: Install ALSA headers (Linux)
@@ -103,7 +109,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.x'
 
       - name: Download all prebuilds
         uses: actions/download-artifact@v4
