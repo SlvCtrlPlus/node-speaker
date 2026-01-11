@@ -1,6 +1,6 @@
 # node-speaker
 
-> ℹ️ **Info:** This is an a fork of the original node-speaker package. It includes the fixes for Linux ARM64 support and
+> **Info:** This is a fork of the original node-speaker package. It includes the fixes for Linux ARM64 support and
 > the muting of the coreaudio buffer underflow warning. 
 > CI has been extended to all major OS/Arch/Node combinations and dependencies haven been updated. 
 > Node >=18 is required now.
