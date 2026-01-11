@@ -27,9 +27,6 @@ jobs:
           - runs-on: windows-latest
             os: windows
             arch: x64
-          - runs-on: windows-11-arm
-            os: windows
-            arch: arm64
 
     runs-on: ${{ matrix.combo.runs-on }}
 
