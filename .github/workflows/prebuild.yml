@@ -12,27 +12,27 @@ jobs:
       matrix:
         include:
           # Linux x64
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: x64
 
           # Linux ARM64
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: arm64
 
           # macOS x64
-          - os: macos-12
+          - os: macos-latest
             arch: x64
 
           # macOS ARM64
-          - os: macos-14
+          - os: macos-latest
             arch: arm64
 
           # Windows x64
-          - os: windows-2022
+          - os: windows-latest
             arch: x64
 
           # Windows x86
-          - os: windows-2022
+          - os: windows-latest
             arch: ia32
 
     runs-on: ${{ matrix.os }}
