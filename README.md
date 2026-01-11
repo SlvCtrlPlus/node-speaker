@@ -16,11 +16,29 @@ these days.
 
 ## Installation
 
+### From npm
+
 Simply compile and install `node-speaker` using `npm`:
 
 ```sh
 npm install speaker
 ```
+
+### From GitHub Releases (with prebuilt binaries)
+
+Install a specific release from GitHub:
+
+```sh
+npm install https://github.com/YOUR_USERNAME/node-speaker/releases/download/v0.5.6/speaker-v0.5.6.tgz
+```
+
+Or install from a git tag:
+
+```sh
+npm install github:YOUR_USERNAME/node-speaker#v0.5.6
+```
+
+### Platform Requirements
 
 On Debian/Ubuntu, the [ALSA][alsa] backend is selected by default, so be sure
 to have the `alsa.h` header file in place:

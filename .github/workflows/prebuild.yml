@@ -1,0 +1,144 @@
+name: Prebuild
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  prebuild:
+    strategy:
+      matrix:
+        include:
+          # Linux x64
+          - os: ubuntu-20.04
+            arch: x64
+
+          # Linux ARM64
+          - os: ubuntu-20.04
+            arch: arm64
+
+          # macOS x64
+          - os: macos-12
+            arch: x64
+
+          # macOS ARM64
+          - os: macos-14
+            arch: arm64
+
+          # Windows x64
+          - os: windows-2022
+            arch: x64
+
+          # Windows x86
+          - os: windows-2022
+            arch: ia32
+
+    runs-on: ${{ matrix.os }}
+
+    name: Prebuild ${{ matrix.os }} - ${{ matrix.arch }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          architecture: ${{ matrix.arch }}
+
+      - name: Install ALSA headers (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Setup ARM64 cross-compilation (Linux ARM64)
+        if: runner.os == 'Linux' && matrix.arch == 'arm64'
+        run: |
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y libasound2-dev:arm64
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Prebuild (Linux x64)
+        if: runner.os == 'Linux' && matrix.arch == 'x64'
+        run: prebuildify --napi --strip
+
+      - name: Prebuild (Linux ARM64)
+        if: runner.os == 'Linux' && matrix.arch == 'arm64'
+        run: |
+          export CC=aarch64-linux-gnu-gcc
+          export CXX=aarch64-linux-gnu-g++
+          export npm_config_arch=arm64
+          prebuildify --napi --strip --arch arm64
+
+      - name: Prebuild (macOS)
+        if: runner.os == 'macOS'
+        run: prebuildify --napi --strip
+
+      - name: Prebuild (Windows)
+        if: runner.os == 'Windows'
+        run: prebuildify --napi --strip --arch ${{ matrix.arch }}
+
+      - name: Upload prebuilds
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilds-${{ matrix.os }}-${{ matrix.arch }}
+          path: prebuilds/
+          retention-days: 7
+
+  release:
+    needs: prebuild
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download all prebuilds
+        uses: actions/download-artifact@v4
+        with:
+          path: prebuilds-artifacts
+
+      - name: Consolidate prebuilds
+        run: |
+          mkdir -p prebuilds
+          # Copy maintaining the directory structure that prebuild-install expects
+          # Each artifact contains: prebuilds/[platform-arch]/node.napi.node
+          cp -r prebuilds-artifacts/*/prebuilds/* prebuilds/ 2>/dev/null || true
+          # If the above fails, try flat structure
+          for dir in prebuilds-artifacts/*/; do
+            if [ -d "$dir/prebuilds" ]; then
+              cp -r "$dir/prebuilds/"* prebuilds/
+            fi
+          done
+          echo "Prebuild directory structure:"
+          ls -R prebuilds/
+
+      - name: Create tarball with prebuilds
+        run: |
+          npm install --ignore-scripts
+          npm pack
+          mv speaker-*.tgz speaker-${{ github.ref_name }}.tgz
+          echo "Tarball contents:"
+          tar -tzf speaker-${{ github.ref_name }}.tgz | grep -E 'prebuilds|package.json' | head -20
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: speaker-${{ github.ref_name }}.tgz
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
