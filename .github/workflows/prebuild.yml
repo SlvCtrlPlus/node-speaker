@@ -9,38 +9,28 @@ on:
 jobs:
   prebuild:
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          # Linux x64
-          - os: ubuntu-latest
+        combo:
+          - runs-on: ubuntu-latest
+            os: ubuntu
             arch: x64
-            node: '20.x'
-
-          # Linux ARM64
-          - os: ubuntu-latest
+          - runs-on: ubuntu-latest
+            os: ubuntu
             arch: arm64
-            node: '20.x'
-
-          # macOS x64
-          - os: macos-latest
+          - runs-on: macos-latest
+            os: macos
             arch: x64
-            node: '20.x'
-
-          # macOS ARM64
-          - os: macos-latest
+          - runs-on: macos-latest
+            os: macos
             arch: arm64
-            node: '20.x'
-
-          # Windows x64
-          - os: windows-latest
+          - runs-on: windows-latest
+            os: windows
             arch: x64
-            node: '20.x'
 
-          # Note: Windows ia32 (32-bit) removed - Node.js 18+ doesn't provide ia32 builds for Windows
+    runs-on: ${{ matrix.combo.runs-on }}
 
-    runs-on: ${{ matrix.os }}
-
-    name: Prebuild ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Prebuild ${{ matrix.combo.os }}-${{ matrix.combo.arch }}
 
     steps:
       - uses: actions/checkout@v4
@@ -48,8 +38,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          architecture: ${{ matrix.arch }}
+          node-version: '20.x'
+          architecture: ${{ matrix.combo.arch }}
 
       - name: Install ALSA headers (Linux)
         if: runner.os == 'Linux'
@@ -57,38 +47,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2-dev
 
-      - name: Setup ARM64 cross-compilation (Linux ARM64)
-        if: runner.os == 'Linux' && matrix.arch == 'arm64'
-        run: |
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
       - name: Install dependencies
         run: npm install --ignore-scripts
 
-      - name: Prebuild (Linux x64)
-        if: runner.os == 'Linux' && matrix.arch == 'x64'
+      - name: Install prebuildify
+        run: npm install -g prebuildify
+
+      - name: Prebuild
         run: prebuildify --napi --strip
 
-      - name: Prebuild (Linux ARM64)
-        if: runner.os == 'Linux' && matrix.arch == 'arm64'
-        run: |
-          export CC=aarch64-linux-gnu-gcc
-          export CXX=aarch64-linux-gnu-g++
-          export npm_config_arch=arm64
-          prebuildify --napi --strip --arch arm64
-
-      - name: Prebuild (macOS)
-        if: runner.os == 'macOS'
-        run: prebuildify --napi --strip
-
-      - name: Prebuild (Windows)
-        if: runner.os == 'Windows'
-        run: prebuildify --napi --strip --arch ${{ matrix.arch }}
 
       - name: Upload prebuilds
         uses: actions/upload-artifact@v4
         with:
-          name: prebuilds-${{ matrix.os }}-${{ matrix.arch }}
+          name: prebuilds-${{ matrix.combo.os }}-${{ matrix.combo.arch }}
           path: prebuilds/
           retention-days: 7
 
