@@ -36,10 +36,7 @@ jobs:
             arch: x64
             node: '20.x'
 
-          # Windows x86 (32-bit) - uses Node 18 for ia32 support
-          - os: windows-latest
-            arch: ia32
-            node: '18.x'
+          # Note: Windows ia32 (32-bit) removed - Node.js 18+ doesn't provide ia32 builds for Windows
 
     runs-on: ${{ matrix.os }}
 
