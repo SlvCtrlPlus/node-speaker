@@ -83,19 +83,22 @@ jobs:
       - name: Consolidate prebuilds
         run: |
           mkdir -p prebuilds
-          # Downloaded artifacts structure:
+          # Downloaded artifacts structure (path: prebuilds/ uploads its contents):
           # prebuilds-artifacts/
-          #   prebuilds-ubuntu-x64/
-          #     prebuilds/
-          #       linux-x64/
-          #         node.napi.node
-          # Merge all platform directories into root prebuilds/
-          for artifact_dir in prebuilds-artifacts/*/prebuilds/*/; do
-            if [ -d "$artifact_dir" ]; then
-              platform=$(basename "$artifact_dir")
-              echo "Copying $platform from $artifact_dir"
-              cp -rv "$artifact_dir" prebuilds/ || true
-            fi
+          #   prebuilds-ubuntu-x64/      <- artifact name
+          #     linux-x64/               <- platform-arch directory (direct content)
+          #       speaker.node
+          #   prebuilds-macos-arm64/
+          #     darwin-arm64/
+          #       speaker.node
+          # Copy all platform-arch directories from each artifact to root prebuilds/
+          echo "Artifact contents:"
+          ls -R prebuilds-artifacts/
+          echo ""
+          for artifact_dir in prebuilds-artifacts/*/; do
+            echo "Processing artifact: $artifact_dir"
+            # Copy everything from this artifact directory to prebuilds/
+            cp -rv "$artifact_dir"* prebuilds/ 2>/dev/null || echo "Nothing to copy from $artifact_dir"
           done
           echo ""
           echo "Final prebuild directory structure:"
@@ -106,6 +109,9 @@ jobs:
 
       - name: Create tarball with prebuilds
         run: |
+          # Remove artifacts directory to ensure it's not included in tarball
+          rm -rf prebuilds-artifacts
+          # Install dependencies and create tarball
           npm install --ignore-scripts
           npm pack
           mv speaker-*.tgz speaker-${{ github.ref_name }}.tgz
