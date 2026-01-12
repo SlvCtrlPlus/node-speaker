@@ -83,25 +83,40 @@ jobs:
       - name: Consolidate prebuilds
         run: |
           mkdir -p prebuilds
-          # Copy maintaining the directory structure that prebuild-install expects
-          # Each artifact contains: prebuilds/[platform-arch]/node.napi.node
-          cp -r prebuilds-artifacts/*/prebuilds/* prebuilds/ 2>/dev/null || true
-          # If the above fails, try flat structure
-          for dir in prebuilds-artifacts/*/; do
-            if [ -d "$dir/prebuilds" ]; then
-              cp -r "$dir/prebuilds/"* prebuilds/
+          # Downloaded artifacts structure:
+          # prebuilds-artifacts/
+          #   prebuilds-ubuntu-x64/
+          #     prebuilds/
+          #       linux-x64/
+          #         node.napi.node
+          # Merge all platform directories into root prebuilds/
+          for artifact_dir in prebuilds-artifacts/*/prebuilds/*/; do
+            if [ -d "$artifact_dir" ]; then
+              platform=$(basename "$artifact_dir")
+              echo "Copying $platform from $artifact_dir"
+              cp -rv "$artifact_dir" prebuilds/ || true
             fi
           done
-          echo "Prebuild directory structure:"
+          echo ""
+          echo "Final prebuild directory structure:"
           ls -R prebuilds/
+          echo ""
+          echo "Checking for .node files:"
+          find prebuilds -name "*.node" -type f
 
       - name: Create tarball with prebuilds
         run: |
           npm install --ignore-scripts
           npm pack
           mv speaker-*.tgz speaker-${{ github.ref_name }}.tgz
-          echo "Tarball contents:"
-          tar -tzf speaker-${{ github.ref_name }}.tgz | grep -E 'prebuilds|package.json' | head -20
+          echo ""
+          echo "Tarball created: speaker-${{ github.ref_name }}.tgz"
+          echo ""
+          echo "Verifying prebuilds in tarball:"
+          tar -tzf speaker-${{ github.ref_name }}.tgz | grep "prebuilds/.*\.node" || echo "WARNING: No .node files found in tarball!"
+          echo ""
+          echo "Full prebuilds structure in tarball:"
+          tar -tzf speaker-${{ github.ref_name }}.tgz | grep "prebuilds" | head -30
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
