@@ -1,7 +1,7 @@
 {
   'targets': [
     {
-      'target_name': 'binding',
+      'target_name': 'speaker',
       'sources': [
         'src/binding.c',
       ],
