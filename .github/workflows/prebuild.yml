@@ -12,10 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         combo:
-          - runs-on: ubuntu-latest
+          - runs-on: ubuntu-22.04
             os: ubuntu
             arch: x64
-          - runs-on: ubuntu-24.04-arm
+          - runs-on: ubuntu-22.04-arm
             os: ubuntu
             arch: arm64
           - runs-on: macos-latest
