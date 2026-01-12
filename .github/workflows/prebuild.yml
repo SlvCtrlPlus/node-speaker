@@ -98,7 +98,7 @@ jobs:
           for artifact_dir in prebuilds-artifacts/*/; do
             echo "Processing artifact: $artifact_dir"
             # Copy everything from this artifact directory to prebuilds/
-            cp -rv "$artifact_dir"* prebuilds/ 2>/dev/null || echo "Nothing to copy from $artifact_dir"
+            cp -rv "$artifact_dir"* prebuilds/ || echo "Nothing to copy from $artifact_dir"
           done
           echo ""
           echo "Final prebuild directory structure:"
@@ -109,9 +109,6 @@ jobs:
 
       - name: Create tarball with prebuilds
         run: |
-          # Remove artifacts directory to ensure it's not included in tarball
-          rm -rf prebuilds-artifacts
-          # Install dependencies and create tarball
           npm install --ignore-scripts
           npm pack
           mv speaker-*.tgz speaker-${{ github.ref_name }}.tgz

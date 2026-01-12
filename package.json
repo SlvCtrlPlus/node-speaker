@@ -8,6 +8,14 @@
   "binary": {
     "napi_versions": [3]
   },
+  "files": [
+    "binding.gyp",
+    "deps/",
+    "index.js",
+    "index.d.ts",
+    "src/",
+    "prebuilds/"
+  ],
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
