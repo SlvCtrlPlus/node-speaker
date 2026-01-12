@@ -20,8 +20,8 @@
   "types": "index.d.ts",
   "scripts": {
     "test": "standard && node-gyp rebuild --mpg123-backend=dummy && mocha --reporter spec",
-    "install": "prebuild-install || node-gyp rebuild",
-    "prebuild": "npx prebuildify --napi --strip"
+    "install": "node-gyp-build",
+    "prebuild": "prebuildify --strip"
   },
   "dependencies": {
     "buffer-alloc": "^1.1.0",
@@ -32,7 +32,6 @@
     "@types/node": "^18.0.0",
     "mocha": "^11.7.5",
     "prebuildify": "^6.0.1",
-    "prebuildify-cross": "^5.1.1",
     "standard": "^17.1.2"
   },
   "engines": {
