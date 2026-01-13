@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NAPI_VERSION 1
+#define NAPI_VERSION 3
 #include <node_api.h>
 
 #include "output.h"
